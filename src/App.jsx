@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import GameState from './gameState'
+import Display from './display'
 
-function App(){ 
+function App() {
 
-  return (
-   <GameState/>
-  )
+  return (<Display />)
+
 }
 
 export default App
