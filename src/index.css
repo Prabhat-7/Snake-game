@@ -1,10 +1,15 @@
-canvas {
-  background-color: rgb(64, 114, 118);
-}
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
-body {
-  background-color: black;
-  color: white;
-  justify-content: center;
-  display: flex;
+/* Global styles and variables */
+:root {
+  --background-light: #2b2b2b;
+  --background-dark: #1a1a1a;
+  --background-darker: #0f0f0f;
+  --accent-primary: #df4cd2;
+  --accent-secondary: #ff4444;
+  --accent-info: #0dcaf0;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --border-radius: 8px;
+  --container-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }

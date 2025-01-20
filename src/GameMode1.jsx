@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function GamePieces({
-  setScore,
-  setHighestScore,
-  handleGameOver,
-}) {
+export default function GamePieces({ setScore, handleGameOver, }) {
   const canvasRef = useRef();
   const snakeSpeed = 14;
+  const [lastValidDirection, setLastValidDirection] = useState(null);
   const [direction, setDirection] = useState(null);
   const [snake, setSnake] = useState([
     { x: 98, y: 98 },
@@ -14,9 +11,55 @@ export default function GamePieces({
   ]);
   const [food, setFood] = useState({ x: 14, y: 98 });
 
+  // Function to check if a move is valid
+  const isValidMove = (currentDirection, newDirection) => {
+    if (!currentDirection) return true;
+
+    const opposites = {
+      up: "down",
+      down: "up",
+      left: "right",
+      right: "left",
+    };
+
+    return opposites[currentDirection] !== newDirection;
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+
+    const handleKeyPress = (e) => {
+      let newDirection = null;
+
+      switch (e.key) {
+        case "w":
+        case "ArrowUp":
+          newDirection = "up";
+          break;
+        case "a":
+        case "ArrowLeft":
+          newDirection = "left";
+          break;
+        case "s":
+        case "ArrowDown":
+          newDirection = "down";
+          break;
+        case "d":
+        case "ArrowRight":
+          newDirection = "right";
+          break;
+        default:
+          return;
+      }
+
+      if (isValidMove(lastValidDirection, newDirection)) {
+        setDirection(newDirection);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
     const drawSnake = () => {
       snake.forEach((snakePart) => {
         ctx.beginPath();
@@ -26,6 +69,7 @@ export default function GamePieces({
         ctx.closePath();
       });
     };
+
     const drawFood = () => {
       ctx.beginPath();
       ctx.rect(food.x, food.y, 10, 10);
@@ -33,14 +77,13 @@ export default function GamePieces({
       ctx.fill();
       ctx.closePath();
     };
+
     const moveSnake = () => {
       if (direction) {
         setSnake((previousSnake) => {
           const newSnake = [...previousSnake];
           const snakeHead = { x: newSnake[0].x, y: newSnake[0].y };
-          for (let i = newSnake.length - 1; i > 0; i--) {
-            newSnake[i] = newSnake[i - 1];
-          }
+
           switch (direction) {
             case "right":
               snakeHead.x += snakeSpeed;
@@ -55,50 +98,18 @@ export default function GamePieces({
               snakeHead.y += snakeSpeed;
               break;
           }
+
+          // Update last valid direction after successful move
+          setLastValidDirection(direction);
+
+          for (let i = newSnake.length - 1; i > 0; i--) {
+            newSnake[i] = { ...newSnake[i - 1] };
+          }
           newSnake[0] = snakeHead;
           return newSnake;
         });
       }
     };
-    const handleKeyPress = (e) => {
-      switch (e.key) {
-        case "w":
-        case "ArrowUp":
-          if (direction != "down") {
-            // Prevent moving up if currently moving down
-            setDirection("up");
-          }
-          break;
-        case "a":
-        case "ArrowLeft":
-          if (direction != "right") {
-            // Prevent moving left if currently moving right
-            setDirection("left");
-          }
-          break;
-        case "s":
-        case "ArrowDown":
-          if (!(direction == "up")) {
-            // Prevent moving down if currently moving up
-            setDirection("down");
-          }
-          break;
-        case "d":
-        case "ArrowRight":
-          if (direction != "left") {
-            // Prevent moving right if currently moving left
-            setDirection("right");
-          }
-          break;
-        default:
-          break; // Handle other keys or ignore them
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-
-
-
 
     const handleFoodEaten = () => {
       setScore((prevScore) => prevScore + 1);
@@ -114,6 +125,7 @@ export default function GamePieces({
         y: Math.floor((Math.random() * canvas.height) / 14) * 14,
       });
     };
+
     const checkForCollision = () => {
       if (
         snake[0].x < food.x + 14 &&
@@ -131,7 +143,7 @@ export default function GamePieces({
         handleGameOver("wall");
       }
       for (let i = 1; i < snake.length; i++) {
-        if (snake[0].x == snake[i].x && snake[0].y == snake[i].y) {
+        if (snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
           handleGameOver("ownBody");
         }
       }
@@ -142,13 +154,14 @@ export default function GamePieces({
       drawFood();
       drawSnake();
       checkForCollision();
-
       moveSnake();
     }, 100);
-    return () => {
-      clearTimeout(intervalId);
-    };
-  }, [direction, snake]);
 
-  return <canvas ref={canvasRef} width={700} height={500}></canvas>;
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [direction, snake, food]);
+
+  return <canvas ref={canvasRef} width={900} height={450}></canvas>;
 }

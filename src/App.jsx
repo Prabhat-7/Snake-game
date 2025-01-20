@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import Display from './display'
+import React from 'react';
+import Display from './display.jsx';
 
 function App() {
-
-  return (<Display />)
-
+  return (
+    <div className="App">
+      <Display />
+    </div>
+  );
 }
 
-export default App
+export default App;
